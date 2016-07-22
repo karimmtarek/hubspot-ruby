@@ -18,6 +18,7 @@ module Hubspot
     CONTACTS_PATH              = '/contacts/v1/lists/all/contacts/all'
     RECENT_CONTACTS_PATH       = '/contacts/v1/lists/recently_updated/contacts/recent'
     CREATE_OR_UPDATE_PATH      = '/contacts/v1/contact/createOrUpdate/email/:contact_email'
+    BATCH_CREATE_OR_UPDATE_PATH  = '/contacts/v1/contact/batch/'
 
     class << self
       # {https://developers.hubspot.com/docs/methods/contacts/create_contact}
@@ -31,11 +32,11 @@ module Hubspot
       # {https://developers.hubspot.com/docs/methods/contacts/get_contacts}
       # {https://developers.hubspot.com/docs/methods/contacts/get_recently_updated_contacts}
       def all(opts={})
-        recent = opts.delete(:recent) { false } 
-        path, opts = 
-        if recent 
-          [RECENT_CONTACTS_PATH, Hubspot::ContactProperties.add_default_parameters(opts)] 
-        else 
+        recent = opts.delete(:recent) { false }
+        path, opts =
+        if recent
+          [RECENT_CONTACTS_PATH, Hubspot::ContactProperties.add_default_parameters(opts)]
+        else
           [CONTACTS_PATH, opts]
         end
 
@@ -54,6 +55,35 @@ module Hubspot
         contact.is_new = response['isNew']
         contact
       end
+
+      # TODO: Add non-batch support: {https://developers.hubspot.com/docs/methods/contacts/create_or_update}
+      # NOTE: Performance is best when calls are limited to 100 or fewer contacts
+      # {https://developers.hubspot.com/docs/methods/contacts/batch_create_or_update}
+      def create_or_update!(contacts)
+        query = contacts.map do |contact|
+          contact_hash = contact.with_indifferent_access
+          contact_param = {
+            properties: Hubspot::Utils.hash_to_properties(contact_hash.except(:vid))
+          }
+          if contact_hash[:vid]
+            contact_param.merge!(vid: contact_hash[:vid])
+          elsif contact_hash[:email]
+            contact_param.merge!(email: contact_hash[:email])
+          else
+            raise Hubspot::InvalidParams, 'expecting vid or email for contact'
+          end
+          contact_param
+        end
+
+        response = Hubspot::Connection.post_json(
+            BATCH_CREATE_OR_UPDATE_PATH,
+            params: {},
+            body: query
+          )
+
+        response
+      end
+
 
       # NOTE: problem with batch api endpoint
       # {https://developers.hubspot.com/docs/methods/contacts/get_contact}
@@ -94,7 +124,7 @@ module Hubspot
 
       # NOTE: problem with batch api endpoint
       # {https://developers.hubspot.com/docs/methods/contacts/get_contact_by_utk}
-      # {https://developers.hubspot.com/docs/methods/contacts/get_batch_by_utk} 
+      # {https://developers.hubspot.com/docs/methods/contacts/get_batch_by_utk}
       def find_by_utk(utks)
         batch_mode, path, params = case utks
         when String then [false, GET_CONTACT_BY_UTK_PATH, { contact_utk: utks }]
