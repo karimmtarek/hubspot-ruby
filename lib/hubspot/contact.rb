@@ -80,7 +80,6 @@ module Hubspot
             params: {},
             body: query
           )
-
         response
       end
 
