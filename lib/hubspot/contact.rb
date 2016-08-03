@@ -8,7 +8,7 @@ module Hubspot
   class Contact
     CREATE_CONTACT_PATH        = '/contacts/v1/contact'
     GET_CONTACT_BY_EMAIL_PATH  = '/contacts/v1/contact/email/:contact_email/profile'
-    GET_CONTACTS_BY_EMAIL_PATH = '/contacts/v1/contact/emails/batch/:contact_emails/'
+    GET_CONTACTS_BY_EMAIL_PATH = '/contacts/v1/contact/emails/batch/'
     GET_CONTACT_BY_ID_PATH     = '/contacts/v1/contact/vid/:contact_id/profile'
     CONTACT_BATCH_PATH         = '/contacts/v1/contact/vids/batch'
     GET_CONTACT_BY_UTK_PATH    = '/contacts/v1/contact/utk/:contact_utk/profile'
