@@ -83,7 +83,6 @@ module Hubspot
         response
       end
 
-
       # NOTE: problem with batch api endpoint
       # {https://developers.hubspot.com/docs/methods/contacts/get_contact}
       # {https://developers.hubspot.com/docs/methods/contacts/get_batch_by_vid}
@@ -111,7 +110,7 @@ module Hubspot
         begin
           response = Hubspot::Connection.get_json(path, params)
           if batch_mode
-            response.map{|_, contact| new(contact)}
+            response
           else
             new(response)
           end
