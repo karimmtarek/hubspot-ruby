@@ -8,7 +8,7 @@ module Hubspot
   class Contact
     CREATE_CONTACT_PATH        = '/contacts/v1/contact'
     GET_CONTACT_BY_EMAIL_PATH  = '/contacts/v1/contact/email/:contact_email/profile'
-    GET_CONTACTS_BY_EMAIL_PATH = '/contacts/v1/contact/emails/batch'
+    GET_CONTACTS_BY_EMAIL_PATH = '/contacts/v1/contact/emails/batch/:contact_emails'
     GET_CONTACT_BY_ID_PATH     = '/contacts/v1/contact/vid/:contact_id/profile'
     CONTACT_BATCH_PATH         = '/contacts/v1/contact/vids/batch'
     GET_CONTACT_BY_UTK_PATH    = '/contacts/v1/contact/utk/:contact_utk/profile'
@@ -110,7 +110,7 @@ module Hubspot
         begin
           response = Hubspot::Connection.get_json(path, params)
           if batch_mode
-            response
+            response.map{|_, contact| new(contact)}
           else
             new(response)
           end
